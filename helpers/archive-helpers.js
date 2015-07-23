@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var httpRequest = require('http-request');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -16,7 +17,7 @@ exports.paths = {
 };
 
 // Used for stubbing paths for tests, do not modify
-exports.initialize = function(pathsObj){
+exports.initialize = function(pathsObj) {
   _.each(pathsObj, function(path, type) {
     exports.paths[type] = path;
   });
@@ -25,26 +26,55 @@ exports.initialize = function(pathsObj){
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function(callback){
-  fs.readFile(exports.paths.list, 'binary', function(err, data){
-    if(err) console.log(err);
+exports.readListOfUrls = function(callback) {
+  fs.readFile(exports.paths.list, 'binary', function(err, data) {
+    if (err) throw err;
     var urlArray = data.split('\n');
     callback(urlArray);
   });
 };
 
-exports.isUrlInList = function(site, callback){
-  exports.readListOfUrls(function(urlArray){
+exports.isUrlInList = function(site, callback) {
+  exports.readListOfUrls(function(urlArray) {
     var ifInList = urlArray.indexOf(site) !== -1;
     callback(ifInList);
   });
 };
 
-exports.addUrlToList = function(){
+exports.addUrlToList = function(site, callback) {
+  var newLineInSites = site+'\n';
+  fs.writeFile(exports.paths.list, newLineInSites, function(err) {
+    if (err) throw err;
+    callback();
+  });
 };
 
-exports.isUrlArchived = function(){
+exports.isUrlArchived = function(site, callback) {
+  var archivePath = path.join(exports.paths.archivedSites, site);
+  fs.readFile(archivePath, function(err, data) {
+    if (err) {
+      callback(false);
+    } 
+    else {
+      callback(true);
+    } 
+  });
 };
 
-exports.downloadUrls = function(){
+exports.downloadUrls = function(urlArray) {
+  urlArray.forEach(function(url) {
+    exports.isUrlArchived(url, function(exists) {
+      if (!exists) {
+        httpRequest.get(url, function (err, res) {
+          if (err) throw err; 
+          var archivedFileName = path.join(exports.paths.archivedSites, url);
+          fs.writeFile(archivedFileName, res.buffer.toString(),function(err) {
+            if (err) throw err;
+            exports.addUrlToList(url);
+          });
+           // console.log(res.code, res.headers);
+        });
+      } console.log(urlArray);
+    });
+  });
 };
