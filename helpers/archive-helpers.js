@@ -30,22 +30,22 @@ exports.readListOfUrls = function(callback) {
   fs.readFile(exports.paths.list, 'binary', function(err, data) {
     if (err) throw err;
     var urlArray = data.split('\n');
-    callback(urlArray);
+    if (callback) callback(urlArray);
   });
 };
 
 exports.isUrlInList = function(site, callback) {
   exports.readListOfUrls(function(urlArray) {
     var ifInList = urlArray.indexOf(site) !== -1;
-    callback(ifInList);
+    if (callback) callback(ifInList);
   });
 };
 
 exports.addUrlToList = function(site, callback) {
   var newLineInSites = site+'\n';
-  fs.writeFile(exports.paths.list, newLineInSites, function(err) {
+  fs.appendFile(exports.paths.list, newLineInSites, function(err) {
     if (err) throw err;
-    callback();
+    if (callback) callback();
   });
 };
 
@@ -53,10 +53,10 @@ exports.isUrlArchived = function(site, callback) {
   var archivePath = path.join(exports.paths.archivedSites, site);
   fs.readFile(archivePath, function(err, data) {
     if (err) {
-      callback(false);
+      if (callback) callback(false);
     } 
     else {
-      callback(true);
+      if (callback) callback(true);
     } 
   });
 };
@@ -74,7 +74,7 @@ exports.downloadUrls = function(urlArray) {
           });
            // console.log(res.code, res.headers);
         });
-      } console.log(urlArray);
+      } 
     });
   });
 };

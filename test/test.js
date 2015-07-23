@@ -149,7 +149,7 @@ describe("archive helpers", function(){
 
         expect(fs.readdirSync(archive.paths.archivedSites)).to.deep.equal(urlArray);
         done();
-      }, 5000);
+      }, 1000);
     });
   });
 });

@@ -17,7 +17,7 @@ exports.serveAssets = function(res, asset, callback) {
 
   fs.readFile(asset,function(err,data) {
     if (err) {
-      res.writeHead(404);
+      res.writeHead(404, exports.headers);
       res.end();
       return;
     } 
