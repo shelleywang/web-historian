@@ -30,6 +30,7 @@ exports.readListOfUrls = function(callback) {
   fs.readFile(exports.paths.list, 'binary', function(err, data) {
     if (err) throw err;
     var urlArray = data.split('\n');
+    urlArray.pop(); 
     if (callback) callback(urlArray);
   });
 };
@@ -65,13 +66,13 @@ exports.downloadUrls = function(urlArray) {
   urlArray.forEach(function(url) {
     exports.isUrlArchived(url, function(exists) {
       if (!exists) {
-        httpRequest.get(url, function (err, res) {
+        var archivedFileName = path.join(exports.paths.archivedSites, url);
+        httpRequest.get(url, archivedFileName, function (err, res) {
           if (err) throw err; 
-          var archivedFileName = path.join(exports.paths.archivedSites, url);
-          fs.writeFile(archivedFileName, res.buffer.toString(),function(err) {
-            if (err) throw err;
-            exports.addUrlToList(url);
-          });
+          // else exports.addUrlToList(url);
+          // fs.writeFile(archivedFileName, res.buffer.toString(),function(err) {
+          //   if (err) throw err; 
+          // });
            // console.log(res.code, res.headers);
         });
       } 
