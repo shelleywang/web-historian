@@ -8,6 +8,8 @@ exports.handleRequest = function (req, res) {
   if (req.method === "GET") {
     if (req.url === '/') {
       httpHelpers.serveAssets(res, path.join(archive.paths.siteAssets,'index.html'));
+    } else if (req.url === '/loading.html') { 
+      httpHelpers.serveAssets(res, path.join(archive.paths.siteAssets,'loading.html'));
     } else {
       httpHelpers.serveAssets(res, path.join(archive.paths.archivedSites, req.url));
     }
@@ -17,11 +19,18 @@ exports.handleRequest = function (req, res) {
       data += chunks;
     });
     req.on('end', function(){
-      // var url = data.split('=')[1];
-      var url = JSON.parse(data).url;
-      archive.addUrlToList(url);
-      res.writeHead(302);
-      res.end();
+      var url = data.split('=')[1];
+      // var url = JSON.parse(data).url;
+      archive.isUrlInList(url, function(isInList) {
+        if (isInList) {
+          res.writeHead(302,{'Location':'http://127.0.0.1:8080/'+url});
+          res.end();
+        } else {
+          res.writeHead(302,{'Location':'http://127.0.0.1:8080/'+'loading.html'});
+          res.end();
+          archive.addUrlToList(url);
+        }
+      });
     });
   }    
 };
